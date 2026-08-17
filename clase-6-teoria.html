@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clase 6 · Teoría · Gestión de procesos · IE María de los Ángeles Cano</title>
+<meta name="description" content="Material de teoría de la Clase 6 de Sistemas Operativos: comunicación entre procesos y administración de la prioridad de procesos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F8FD;
+  --surface:#FFFFFF;
+  --surface-alt:#EAF3FC;
+  --surface-alt-2:#DCEBFA;
+  --primary:#155DA6;
+  --primary-dark:#0B3B6B;
+  --primary-mid:#3E82C4;
+  --ink:#132437;
+  --ink-soft:#52708C;
+  --border:#D3E3F2;
+  --accent:#E12419;
+  --accent-soft:#FCE7E5;
+  --success:#177A4C;
+  --success-soft:#E4F5EC;
+  --warn:#B4552F;
+  --warn-soft:#FBEEE6;
+  --radius:14px;
+  --radius-sm:9px;
+  --font-display:'Sora',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'Courier New',monospace;
+  --maxw:920px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.55;font-size:16px;}
+h1,h2,h3,h4{font-family:var(--font-display);color:var(--primary-dark);margin:0 0 .5rem;line-height:1.25;}
+p{margin:0 0 .9rem;}
+a{color:var(--primary);}
+img{max-width:100%;display:block;}
+:focus-visible{outline:3px solid var(--primary-mid);outline-offset:2px;}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 1.25rem;}
+.masthead{background:var(--surface);border-bottom:1px solid var(--border);padding:.85rem 0;}
+.masthead .row{display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;}
+.masthead img.logo{width:38px;height:35px;object-fit:contain;flex:none;margin-right:.15rem;}
+.masthead .inst{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--primary);}
+.masthead .inst span{color:var(--ink-soft);font-weight:600;text-transform:none;letter-spacing:0;}
+.sessionbar{position:sticky;top:0;z-index:40;background:var(--primary-dark);color:#EAF3FC;font-family:var(--font-mono);box-shadow:0 2px 10px rgba(11,59,107,.25);}
+.sessionbar .inner{max-width:var(--maxw);margin:0 auto;padding:.55rem 1.25rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;font-size:.82rem;}
+.sessionbar .spacer{flex:1;}
+.route{background:var(--surface);border-bottom:1px solid var(--border);}
+.route .head{max-width:var(--maxw);margin:0 auto;padding:.55rem 1.25rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.route .head strong{font-size:.82rem;color:var(--primary-dark);}
+.route .toggle{font-size:.75rem;color:var(--primary);border:1px solid var(--border);border-radius:999px;padding:.18rem .6rem;background:var(--surface-alt);}
+.route .list{max-width:var(--maxw);margin:0 auto;padding:0 1.25rem .8rem;display:none;flex-wrap:wrap;gap:.4rem;}
+.route .list.open{display:flex;}
+.route .list a{display:flex;gap:.4rem;align-items:baseline;text-decoration:none;font-size:.74rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:999px;padding:.28rem .65rem;color:var(--ink);}
+.route .list a b{color:var(--primary-dark);font-family:var(--font-mono);}
+.route .list a .t{color:var(--ink-soft);}
+.hero{padding:2.4rem 0 1.6rem;}
+.hero .eyebrow{font-size:.78rem;font-weight:700;color:var(--primary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.4rem;}
+.hero h1{font-size:clamp(1.7rem,4vw,2.5rem);}
+.hero .lead{font-size:1.05rem;color:var(--ink-soft);max-width:62ch;}
+.hero .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem;}
+.chip{background:var(--surface-alt);border:1px solid var(--border);color:var(--primary-dark);font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:999px;}
+.chip.red{background:var(--accent-soft);color:var(--accent);border-color:#F4C2BE;}
+.module{max-width:var(--maxw);margin:0 auto;padding:1.6rem 1.25rem;scroll-margin-top:6.6rem;border-top:1px solid var(--border);}
+.module:first-of-type{border-top:none;}
+.module .kicker{display:flex;align-items:center;gap:.6rem;font-family:var(--font-mono);font-size:.76rem;color:var(--ink-soft);margin-bottom:.5rem;}
+.module .kicker .num{background:var(--primary);color:#fff;border-radius:6px;padding:.12rem .5rem;font-weight:700;}
+.module .kicker .min{background:var(--surface-alt);border:1px solid var(--border);border-radius:6px;padding:.12rem .5rem;}
+.module h2{font-size:1.35rem;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;margin:.9rem 0;}
+.card h3,.card h4{margin-top:0;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;}
+@media (max-width:720px){.grid2,.grid3{grid-template-columns:1fr;}}
+table{width:100%;border-collapse:collapse;margin:.9rem 0;font-size:.92rem;}
+th,td{border:1px solid var(--border);padding:.5rem .6rem;text-align:left;vertical-align:top;}
+th{background:var(--surface-alt);color:var(--primary-dark);font-family:var(--font-display);font-size:.82rem;}
+tr:nth-child(even) td{background:#FAFCFF;}
+button, .btn{font-family:var(--font-body);font-weight:700;font-size:.9rem;border:none;border-radius:9px;padding:.55rem 1.05rem;cursor:pointer;background:var(--primary);color:#fff;}
+button:hover,.btn:hover{background:var(--primary-dark);}
+button.secondary,.btn.secondary{background:var(--surface-alt);color:var(--primary-dark);border:1px solid var(--border);}
+.btnrow{display:flex;gap:.5rem;flex-wrap:wrap;margin:.6rem 0;}
+.compromiso{display:flex;gap:.7rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .85rem;margin:.5rem 0;}
+.compromiso input[type=checkbox]{width:1.15rem;height:1.15rem;margin-top:.15rem;accent-color:var(--primary);flex:none;}
+.compromiso b{display:block;color:var(--primary-dark);}
+.compromiso.checked{background:var(--success-soft);border-color:#BFE3CD;}
+.counter{font-family:var(--font-mono);font-size:.85rem;color:var(--ink-soft);margin-top:.4rem;}
+.quiz-q{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.85rem 1rem;margin:.7rem 0;}
+.quiz-q p.stem{font-weight:700;margin-bottom:.5rem;}
+.quiz-opts{display:flex;flex-direction:column;gap:.4rem;}
+.quiz-opt{display:block;text-align:left;background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;padding:.45rem .7rem;font-size:.9rem;color:var(--ink);cursor:pointer;font-family:var(--font-body);font-weight:500;}
+.quiz-opt:hover{background:var(--surface-alt-2);}
+.quiz-opt.correct{background:var(--success-soft);border-color:var(--success);color:var(--success);font-weight:700;}
+.quiz-opt.wrong{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);}
+.quiz-score{font-family:var(--font-mono);font-weight:700;color:var(--primary-dark);margin-top:.5rem;}
+.stack{display:flex;flex-direction:column;gap:.4rem;margin:1rem 0;}
+.stack .layer{border-radius:9px;padding:.7rem .9rem;font-weight:700;color:#fff;display:flex;justify-content:space-between;font-size:.9rem;}
+.stack .layer span{font-weight:500;font-size:.82rem;opacity:.92;}
+.layout{margin:0 auto;}
+.content-col{max-width:var(--maxw);margin:0 auto;min-width:0;}
+.sidebar-route{display:none;}
+@media (min-width: 980px){
+  .masthead .row{max-width:1260px;}
+  .sessionbar .inner{max-width:1260px;}
+  footer .wrap{max-width:1260px;}
+  .layout{max-width:1260px;padding:0 1.5rem;display:flex;align-items:flex-start;gap:2rem;}
+  .route{display:none;}
+  .sidebar-route{display:block;flex:none;width:270px;position:sticky;top:5.4rem;max-height:calc(100vh - 7rem);overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;}
+  .content-col{flex:1;max-width:var(--maxw);margin:0;}
+  .module{scroll-margin-top:4.6rem;}
+}
+.sidebar-head{font-family:var(--font-mono);font-size:.7rem;font-weight:700;color:var(--ink-soft);letter-spacing:.04em;padding:.2rem .3rem .8rem;border-bottom:1px solid var(--border);margin-bottom:.3rem;}
+.sidebar-list{display:flex;flex-direction:column;}
+.sidebar-item{display:flex;gap:.6rem;align-items:flex-start;text-decoration:none;color:var(--ink);padding:.6rem .4rem;border-bottom:1px solid var(--border);border-left:3px solid transparent;border-radius:0 6px 6px 0;}
+.sidebar-item:hover{background:var(--surface-alt);}
+.sidebar-item.active{background:var(--surface-alt);border-left-color:var(--primary);}
+.sidebar-item .sb-code{flex:none;font-family:var(--font-mono);font-size:.7rem;font-weight:700;color:var(--primary);background:var(--surface-alt);border-radius:5px;padding:.15rem .4rem;min-width:1.5rem;text-align:center;height:fit-content;}
+.sidebar-item.active .sb-code{background:var(--primary);color:#fff;}
+.sidebar-item .sb-body{display:flex;flex-direction:column;gap:.1rem;}
+.sidebar-item .sb-title{font-size:.83rem;font-weight:600;color:var(--ink);line-height:1.3;}
+.sidebar-item .sb-min{font-size:.7rem;color:var(--ink-soft);font-family:var(--font-mono);}
+.sessionbar .clock-box{font-family:var(--font-mono);font-weight:700;font-size:.85rem;color:#EAF3FC;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);border-radius:7px;padding:.32rem .65rem;}
+.sessionbar .navlink{font-family:var(--font-body);font-size:.83rem;font-weight:700;color:#EAF3FC;text-decoration:none;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.3);border-radius:7px;padding:.32rem .75rem;}
+.sessionbar .navlink:hover{background:rgba(255,255,255,.18);}
+@media print{
+  body.print-single .hero{display:none !important;}
+  body.print-single section.module{display:none !important;}
+  body.print-single section.module.print-active{display:block !important;}
+}
+.note{background:var(--surface-alt);border-left:4px solid var(--primary);border-radius:0 8px 8px 0;padding:.7rem 1rem;margin:.9rem 0;font-size:.92rem;}
+.note.warn{background:var(--warn-soft);border-color:var(--warn);}
+.note.ok{background:var(--success-soft);border-color:var(--success);}
+.linklist{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin:.9rem 0;}
+@media (max-width:720px){.linklist{grid-template-columns:1fr;}}
+.linkcard{display:block;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.75rem .9rem;text-decoration:none;}
+.linkcard:hover{border-color:var(--primary-mid);background:var(--surface-alt);}
+.linkcard b{display:block;color:var(--primary-dark);font-size:.92rem;}
+.linkcard span{font-size:.8rem;color:var(--ink-soft);}
+.linkcard em{display:block;font-size:.74rem;color:var(--primary);margin-top:.2rem;font-style:normal;}
+.donebox{display:flex;align-items:center;gap:.5rem;margin-top:1.1rem;padding-top:.8rem;border-top:1px dashed var(--border);}
+.donebox input{width:1.15rem;height:1.15rem;accent-color:var(--success);}
+.donebox label{margin:0;text-transform:none;font-size:.85rem;font-weight:600;color:var(--ink-soft);letter-spacing:0;}
+footer{background:var(--primary-dark);color:#BFD6EE;padding:1.6rem 0;margin-top:2rem;font-size:.82rem;}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;}
+.videobox{position:relative;padding-top:56.25%;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin:.9rem 0;background:#000;}
+.videobox iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;}
+@media print{
+  .sessionbar,.route,.sidebar-route,footer,.no-print,button{display:none !important;}
+  .layout{display:block !important;}
+  .content-col{max-width:100% !important;}
+  body{background:#fff;}
+  .module{border-top:1px solid #ccc;}
+}
+@media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto !important;transition:none !important;} }
+</style>
+</head>
+<body>
+
+<header class="masthead"><div class="wrap row">
+    <img class="logo" src="data:image/png;base64,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" alt="Escudo IE María de los Ángeles Cano">
+    <div class="inst">IE María de los Ángeles Cano <span>· Medellín · Media Técnica</span></div>
+  </div></header>
+<div class="sessionbar"><div class="inner">
+    <span class="clock-box" id="live-clock">--:--:--</span>
+    <span class="spacer"></span>
+    <a class="navlink" href="clase-6-talleres.html">Talleres</a><a class="navlink" href="clase-5-evaluacion.html">Evaluación</a>
+  </div></div>
+
+<div class="layout">
+<aside class="sidebar-route" aria-label="Ruta de la sesión">
+    <div class="sidebar-head">RUTA DE LA SESIÓN</div>
+    <div class="sidebar-list"><a class="sidebar-item" href="#m0"><span class="sb-code">00</span><span class="sb-body"><span class="sb-title">Apertura: evaluación clase 5</span><span class="sb-min">10 min</span></span></a><a class="sidebar-item" href="#m1"><span class="sb-code">01</span><span class="sb-body"><span class="sb-title">Comunicación entre procesos</span><span class="sb-min">15 min</span></span></a><a class="sidebar-item" href="#m2"><span class="sb-code">02</span><span class="sb-body"><span class="sb-title">Mecanismos de comunicación</span><span class="sb-min">20 min</span></span></a><a class="sidebar-item" href="#m3"><span class="sb-code">03</span><span class="sb-body"><span class="sb-title">Administración de procesos y prioridad</span><span class="sb-min">15 min</span></span></a><a class="sidebar-item" href="#m4"><span class="sb-code">04</span><span class="sb-body"><span class="sb-title">Cambiar la prioridad de un proceso</span><span class="sb-min">10 min</span></span></a><a class="sidebar-item" href="#m5"><span class="sb-code">05</span><span class="sb-body"><span class="sb-title">Investiga: algoritmos de planificación</span><span class="sb-min">10 min</span></span></a><a class="sidebar-item" href="#m6"><span class="sb-code">06</span><span class="sb-body"><span class="sb-title">Video: planificación de procesos de la CPU</span><span class="sb-min">8 min</span></span></a><a class="sidebar-item" href="#m7"><span class="sb-code">07</span><span class="sb-body"><span class="sb-title">Cierre: hacia la gestión de memoria</span><span class="sb-min">10 min</span></span></a></div>
+  </aside>
+<div class="content-col">
+<nav class="route">
+    <div class="head" id="route-head">
+      <strong>Ruta de la sesión</strong>
+      <span class="toggle" id="route-toggle">Ver</span>
+    </div>
+    <div class="list" id="route-list"><a href="#m0"><b>00</b><span class="t">Apertura · 10 min</span></a><a href="#m1"><b>01</b><span class="t">Comunicación entre procesos · 15 min</span></a><a href="#m2"><b>02</b><span class="t">Mecanismos · 20 min</span></a><a href="#m3"><b>03</b><span class="t">Administración y prioridad · 15 min</span></a><a href="#m4"><b>04</b><span class="t">Cambiar prioridad · 10 min</span></a><a href="#m5"><b>05</b><span class="t">Investiga · 10 min</span></a><a href="#m6"><b>06</b><span class="t">Video · 8 min</span></a><a href="#m7"><b>07</b><span class="t">Cierre · 10 min</span></a></div>
+  </nav>
+
+<main class="wrap hero">
+  <div class="eyebrow">Gestión de procesos · Clase 6 · Material de teoría</div>
+  <h1>Procesos que se hablan y procesos que esperan su turno</h1>
+  <p class="lead">La clase anterior vimos qué es un proceso y por qué estados pasa durante su vida. Hoy cerramos la
+  unidad de gestión de procesos con dos preguntas: ¿cómo hacen los procesos para intercambiar información entre
+  ellos?, y ¿cómo decide el sistema operativo a cuál proceso le da la CPU primero?</p>
+  <div class="chips">
+    <span class="chip">Comunicación entre procesos</span>
+    <span class="chip">Prioridad de un proceso</span>
+    <span class="chip red">Prepara el laboratorio de cambio de prioridad</span>
+  </div>
+</main>
+
+<section class="module" id="m0">
+  <div class="kicker"><span class="num">00</span><span>Apertura</span><span class="min">10 min</span></div>
+  <h2>Antes de empezar</h2>
+  <div class="card">
+    <h4>Empezamos con la evaluación de la clase anterior</h4>
+    <p style="font-size:.9rem;">Antes de entrar en el tema de hoy, resolvemos la evaluación correspondiente a la
+    clase 5, donde trabajamos qué es un proceso, la diferencia entre programa y proceso, y su ciclo de vida. Ten a
+    mano lo que investigaste sobre procesos zombis y huérfanos.</p>
+    <a class="linkcard" href="clase-5-evaluacion.html" target="_blank" rel="noopener">
+      <b>Evaluación · Clase 5</b><span>Qué es un proceso, programa vs. proceso, ciclo de vida</span>
+      <em>Abrir evaluación →</em>
+    </a>
+  </div>
+  <div class="compromiso"><input type="checkbox"><div><b>El celular es herramienta, no distracción</b>Hoy lo necesitarás para el trabajo en casa: revisa que tenga batería.</div></div>
+  <div class="compromiso"><input type="checkbox"><div><b>Respeto con el docente y con los compañeros</b>Se escucha sin interrumpir, se pide la palabra.</div></div>
+  <div class="compromiso"><input type="checkbox"><div><b>Todo taller tiene evidencia</b>Los talleres 1 y 2 de hoy se entregan por escrito y quedan registrados.</div></div>
+  <div class="counter" id="compromisos-count">Compromisos aceptados: 0 de 3</div>
+  <div class="donebox"><input type="checkbox" id="done-m0"><label for="done-m0">Módulo trabajado</label></div>
+</section>
+
+<section class="module" id="m1">
+  <div class="kicker"><span class="num">01</span><span>Concepto central</span><span class="min">15 min</span></div>
+  <h2>¿Qué es la comunicación entre procesos?</h2>
+  <p>En la clase anterior tratamos cada proceso como si viviera aislado, con su propia memoria y sus propios
+  recursos. En la práctica, muchos procesos necesitan cooperar entre sí: un proceso que descarga un archivo debe
+  avisarle a otro que ya puede empezar a procesarlo; un editor de texto envía datos a la impresora; una aplicación de
+  mensajería recibe datos desde internet y se los entrega a la interfaz que ves en pantalla. A este intercambio de
+  información entre procesos se le llama <strong>comunicación entre procesos</strong> (en inglés, <em>Inter-Process
+  Communication</em> o <strong>IPC</strong>).</p>
+
+  <div class="grid2">
+    <div class="card"><h4>¿Por qué es necesaria?</h4><p style="font-size:.9rem;">Por diseño, cada proceso tiene su
+    propio espacio de memoria, separado del de los demás; el sistema operativo protege esa separación para que un
+    proceso no pueda leer o dañar accidentalmente la memoria de otro. Pero esa misma protección hace que los procesos
+    no puedan compartir datos directamente: necesitan mecanismos específicos, provistos por el sistema operativo,
+    para hacerlo de forma controlada.</p></div>
+    <div class="card"><h4>La analogía de las oficinas</h4><p style="font-size:.9rem;">Cada proceso es como una
+    oficina con la puerta cerrada: nadie puede simplemente entrar y tomar papeles del escritorio ajeno. Si dos
+    oficinas necesitan intercambiar información, deben usar un canal autorizado: un correo, una carpeta compartida,
+    una llamada telefónica. El sistema operativo es quien habilita y vigila esos canales entre procesos.</p></div>
+  </div>
+
+  <p>Sin comunicación entre procesos, un sistema operativo moderno sería inviable: el navegador no podría avisarle al
+  sistema de sonido que reproduzca un video, ni un antivirus podría revisar en segundo plano lo que hacen otros
+  programas, ni podrías copiar un texto de un programa y pegarlo en otro.</p>
+
+  <h3>Actividad · ¿Necesita comunicación entre procesos?</h3>
+  <div data-quiz-group>
+    <div class="quiz-q" data-correct="0"><p class="stem">1. Copias un párrafo en el navegador y lo pegas en un procesador de texto.</p>
+      <div class="quiz-opts"><button class="quiz-opt">Sí, hay comunicación entre procesos (usando el portapapeles)</button><button class="quiz-opt">No, cada proceso trabaja aislado en este caso</button></div></div>
+    <div class="quiz-q" data-correct="1"><p class="stem">2. Un mismo proceso realiza un cálculo interno y guarda el resultado en una variable propia.</p>
+      <div class="quiz-opts"><button class="quiz-opt">Sí, hay comunicación entre procesos</button><button class="quiz-opt">No, todo ocurre dentro de un único proceso</button></div></div>
+    <div class="quiz-q" data-correct="0"><p class="stem">3. Un reproductor de música le pide al sistema de audio que emita el sonido por los parlantes.</p>
+      <div class="quiz-opts"><button class="quiz-opt">Sí, hay comunicación entre procesos</button><button class="quiz-opt">No, es un único proceso trabajando solo</button></div></div>
+    <div class="quiz-score">Aciertos: 0 / 3</div>
+  </div>
+  <div class="donebox"><input type="checkbox" id="done-m1"><label for="done-m1">Módulo trabajado</label></div>
+</section>
+
+<section class="module" id="m2">
+  <div class="kicker"><span class="num">02</span><span>Concepto central</span><span class="min">20 min</span></div>
+  <h2>Mecanismos de comunicación entre procesos</h2>
+  <p>El sistema operativo ofrece distintos mecanismos para que los procesos se comuniquen. No todos sirven para lo
+  mismo: unos están pensados para mover grandes volúmenes de datos rápidamente, otros simplemente para avisar que
+  algo ocurrió.</p>
+
+  <div class="grid2">
+    <div class="card"><h4>Memoria compartida</h4><p style="font-size:.9rem;">El sistema operativo permite que dos o
+    más procesos accedan a una misma zona de memoria RAM. Es el mecanismo más rápido, porque los procesos leen y
+    escriben directamente ahí, sin pasar por el sistema operativo en cada intercambio; a cambio, exige que los
+    procesos se coordinen entre sí para no pisarse los datos.</p></div>
+    <div class="card"><h4>Paso de mensajes</h4><p style="font-size:.9rem;">Los procesos se envían paquetes de
+    información (mensajes) a través del sistema operativo, que actúa de intermediario. Es más lento que la memoria
+    compartida, pero más simple y seguro de coordinar. Dentro de este grupo están las <strong>tuberías</strong>
+    (<em>pipes</em>, un canal de un proceso a otro) y los <strong>sockets</strong> (canales que además permiten
+    comunicar procesos que están en computadores distintos, conectados por red).</p></div>
+    <div class="card"><h4>Archivos compartidos</h4><p style="font-size:.9rem;">Un proceso escribe información en un
+    archivo del disco y otro proceso la lee después. Es sencillo de implementar, pero más lento que los mecanismos
+    anteriores porque implica escribir y leer del disco.</p></div>
+    <div class="card"><h4>Portapapeles (clipboard)</h4><p style="font-size:.9rem;">Un caso particular de memoria
+    compartida administrado por el sistema operativo, pensado para que el usuario mueva información entre programas:
+    es lo que usas cada vez que copias y pegas.</p></div>
+  </div>
+
+  <table>
+    <thead><tr><th>Mecanismo</th><th>Velocidad</th><th>Uso típico</th></tr></thead>
+    <tbody>
+      <tr><td>Memoria compartida</td><td>Muy alta</td><td>Procesos que intercambian muchos datos, en el mismo equipo</td></tr>
+      <tr><td>Tuberías (pipes) / sockets</td><td>Media</td><td>Encadenar procesos o comunicar procesos entre equipos distintos</td></tr>
+      <tr><td>Archivos compartidos</td><td>Baja</td><td>Intercambios poco frecuentes o que deben quedar registrados</td></tr>
+      <tr><td>Portapapeles</td><td>Alta (para poca información)</td><td>Copiar y pegar entre aplicaciones, iniciado por el usuario</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Actividad · Relaciona el caso con el mecanismo</h3>
+  <div data-quiz-group>
+    <div class="quiz-q" data-correct="3"><p class="stem">Copias una imagen en un programa y la pegas en otro.</p>
+      <div class="quiz-opts"><button class="quiz-opt">Archivo compartido</button><button class="quiz-opt">Socket</button><button class="quiz-opt">Memoria compartida entre servidores</button><button class="quiz-opt">Portapapeles</button></div></div>
+    <div class="quiz-q" data-correct="1"><p class="stem">Un navegador en tu computador se comunica con un servidor web ubicado en otro país.</p>
+      <div class="quiz-opts"><button class="quiz-opt">Tubería (pipe)</button><button class="quiz-opt">Socket</button><button class="quiz-opt">Portapapeles</button></div></div>
+    <div class="quiz-q" data-correct="0"><p class="stem">Dos programas del mismo equipo, escritos por el mismo desarrollador, necesitan compartir grandes cantidades de datos lo más rápido posible.</p>
+      <div class="quiz-opts"><button class="quiz-opt">Memoria compartida</button><button class="quiz-opt">Archivo compartido</button><button class="quiz-opt">Portapapeles</button></div></div>
+    <div class="quiz-score">Aciertos: 0 / 3</div>
+  </div>
+  <div class="donebox"><input type="checkbox" id="done-m2"><label for="done-m2">Módulo trabajado</label></div>
+</section>
+
+<section class="module" id="m3">
+  <div class="kicker"><span class="num">03</span><span>Concepto central</span><span class="min">15 min</span></div>
+  <h2>Administración de procesos: la prioridad</h2>
+  <p>Recuerda el estado <strong>Listo</strong> que vimos la clase pasada: varios procesos pueden estar en ese estado
+  al mismo tiempo, esperando su turno para usar la CPU. La pieza del sistema operativo encargada de decidir a cuál
+  proceso le toca el turno se llama <strong>planificador</strong> (<em>scheduler</em>), y una de las herramientas
+  que usa para decidir es la <strong>prioridad</strong> del proceso.</p>
+
+  <div class="grid2">
+    <div class="card"><h4>¿Qué es la prioridad?</h4><p style="font-size:.9rem;">Es un valor numérico que el sistema
+    operativo asigna a cada proceso y que indica qué tan urgente es atenderlo frente a los demás procesos que también
+    están en estado Listo. A mayor prioridad, más posibilidades tiene el proceso de recibir turno de CPU antes que
+    otros.</p></div>
+    <div class="card"><h4>¿Quién la asigna?</h4><p style="font-size:.9rem;">Por defecto, el sistema operativo asigna
+    una prioridad estándar (normal) a la mayoría de los procesos. Algunos procesos del propio sistema operativo
+    reciben prioridades más altas porque son críticos para que el equipo funcione. El usuario, con permisos
+    administrativos, también puede cambiar manualmente la prioridad de un proceso concreto.</p></div>
+  </div>
+
+  <p>La prioridad no es una promesa absoluta de atención inmediata: es un criterio más que el planificador combina
+  con otros (como cuánto tiempo lleva esperando un proceso, para evitar que uno de baja prioridad nunca llegue a
+  ejecutarse). Este concepto de priorización es el mismo que vas a encontrar más adelante cuando veamos gestión de
+  memoria: allí el sistema también decide, con criterios de prioridad, qué información mantener disponible y cuál
+  puede esperar.</p>
+
+  <div class="note">
+    <strong>En Windows</strong>, el Administrador de Tareas permite ver y cambiar la prioridad de un proceso con
+    seis niveles: Baja, Inferior a la normal, Normal, Superior a la normal, Alta y Tiempo real. Este último nivel es
+    delicado: puede volver inestable el equipo si se asigna a un proceso equivocado.
+  </div>
+
+  <h3>Actividad · Verdadero o falso</h3>
+  <div data-quiz-group>
+    <div class="quiz-q" data-correct="0"><p class="stem">Un proceso con prioridad "Alta" siempre termina antes que uno con prioridad "Normal", sin excepción.</p>
+      <div class="quiz-opts"><button class="quiz-opt">Falso: la prioridad influye, pero no lo garantiza de forma absoluta</button><button class="quiz-opt">Verdadero: la prioridad decide todo de forma exacta</button></div></div>
+    <div class="quiz-q" data-correct="0"><p class="stem">El planificador del sistema operativo decide, entre otras cosas, a qué proceso en estado Listo le da la CPU.</p>
+      <div class="quiz-opts"><button class="quiz-opt">Verdadero</button><button class="quiz-opt">Falso</button></div></div>
+    <div class="quiz-score">Aciertos: 0 / 2</div>
+  </div>
+  <div class="donebox"><input type="checkbox" id="done-m3"><label for="done-m3">Módulo trabajado</label></div>
+</section>
+
+<section class="module" id="m4">
+  <div class="kicker"><span class="num">04</span><span>Práctica guiada</span><span class="min">10 min</span></div>
+  <h2>Cambiar la prioridad de un proceso</h2>
+  <p>En Windows, el cambio de prioridad se hace desde el Administrador de Tareas, en la pestaña "Detalles". Sigue
+  estos pasos junto con el docente; los vas a repetir tú mismo en el Taller 2 de hoy.</p>
+
+  <div class="card">
+    <h4>Pasos</h4>
+    <p style="font-size:.9rem;">1. Abre el Administrador de Tareas (clic derecho en la barra de tareas, o
+    <strong>Ctrl + Shift + Esc</strong>).<br>
+    2. Ve a la pestaña <strong>Detalles</strong>.<br>
+    3. Haz clic derecho sobre el proceso que quieras modificar.<br>
+    4. Selecciona <strong>Establecer prioridad</strong> y elige el nivel deseado.<br>
+    5. Confirma el cambio si el sistema lo solicita (algunos cambios requieren permisos de administrador).</p>
+  </div>
+
+  <div class="note warn">
+    <strong>Precaución:</strong> subir la prioridad de un proceso a "Tiempo real" puede hacer que ese proceso acapare
+    la CPU y que el resto del sistema deje de responder. En el taller de hoy solo se trabajará con niveles Baja,
+    Normal y Alta.
+  </div>
+  <div class="donebox"><input type="checkbox" id="done-m4"><label for="done-m4">Módulo trabajado</label></div>
+</section>
+
+<section class="module" id="m5">
+  <div class="kicker"><span class="num">05</span><span>Investigación</span><span class="min">10 min</span></div>
+  <h2>Investiga: algoritmos de planificación</h2>
+  <p>Vimos que el planificador decide, usando la prioridad, a qué proceso le toca la CPU. Pero "decidir con
+  prioridad" se puede hacer de varias maneras distintas: existen procedimientos concretos, llamados
+  <strong>algoritmos de planificación</strong>, que el sistema operativo puede aplicar. En el video de hoy vas a
+  escuchar los nombres de tres de ellos. Esta es tu consigna de investigación.</p>
+
+  <div class="card" style="border-color:#9C8AC9;">
+    <h4>Consigna de investigación</h4>
+    <p style="font-size:.92rem;">Busca en internet (o pregunta a alguien con experiencia en sistemas) qué es el
+    algoritmo <strong>FCFS (First Come, First Served)</strong> y qué es el algoritmo de
+    <strong>Round Robin</strong>. Escribe, con tus propias palabras, una diferencia clara entre los dos: ¿en qué se
+    parecen y en qué se diferencian a la hora de decidir qué proceso atender primero? Guarda tu respuesta: la usarás
+    en la evaluación de la próxima clase.</p>
+  </div>
+
+  <div class="linklist">
+    <a class="linkcard" href="https://www.google.com/search?q=algoritmo+FCFS+planificacion+de+procesos" target="_blank" rel="noopener">
+      <b>Buscar: "algoritmo FCFS planificación de procesos"</b><span>Punto de partida para tu investigación</span>
+      <em>Abre en una pestaña nueva →</em>
+    </a>
+    <a class="linkcard" href="https://www.google.com/search?q=algoritmo+round+robin+planificacion+de+procesos" target="_blank" rel="noopener">
+      <b>Buscar: "algoritmo Round Robin planificación de procesos"</b><span>Punto de partida para tu investigación</span>
+      <em>Abre en una pestaña nueva →</em>
+    </a>
+  </div>
+
+  <p style="font-size:.9rem;color:var(--ink-soft);">Esta es una consigna de investigación genuina: la respuesta no
+  está desarrollada en los módulos anteriores de esta página. Se evalúa que hayas indagado y que expliques la
+  diferencia con tus propias palabras, no una definición copiada sin entender.</p>
+  <div class="donebox"><input type="checkbox" id="done-m5"><label for="done-m5">Módulo trabajado</label></div>
+</section>
+
+<section class="module" id="m6">
+  <div class="kicker"><span class="num">06</span><span>Video</span><span class="min">8 min</span></div>
+  <h2>Video: planificación de procesos de la CPU</h2>
+  <p>Vean juntos este video, titulado <strong>"Planificación de procesos de la CPU"</strong> (canal jvprofe, Juan V.
+  Carrillo), que explica de forma visual cómo trabaja el planificador y presenta tres algoritmos concretos de
+  planificación: <strong>FIFO / FCFS</strong>, <strong>SRT</strong> y <strong>Round Robin</strong>. Presta especial
+  atención a FCFS y Round Robin, porque sobre esos dos trabajarás en la consigna de investigación del módulo
+  anterior y en la evaluación de la próxima clase.</p>
+  <div class="videobox">
+    <iframe src="https://www.youtube.com/embed/jxGnKR3JoOw" title="Planificación de procesos de la CPU (jvprofe · Juan V. Carrillo)" allowfullscreen loading="lazy"></iframe>
+  </div>
+  <p style="font-size:.85rem;color:var(--ink-soft);">Fuente: canal de YouTube jvprofe (Juan V. Carrillo). Duración no
+  verificada por el docente al momento de preparar este material: revísenla directamente en el reproductor.</p>
+  <div class="donebox"><input type="checkbox" id="done-m6"><label for="done-m6">Módulo trabajado</label></div>
+</section>
+
+<section class="module" id="m7">
+  <div class="kicker"><span class="num">07</span><span>Cierre</span><span class="min">10 min</span></div>
+  <h2>Cerramos la gestión de procesos</h2>
+  <p>Con la comunicación entre procesos y la prioridad ya vistas, cerramos la unidad de gestión de procesos. La idea
+  de priorizar qué atender primero, que hoy aplicamos a procesos compitiendo por la CPU, va a reaparecer pronto
+  cuando estudiemos gestión de memoria: allí el sistema operativo también prioriza, pero decidiendo qué información
+  mantiene disponible en memoria RAM y cuál puede esperar en el disco.</p>
+
+  <div class="card">
+    <h4>Para repasar antes del taller</h4>
+    <p style="font-size:.9rem;">1. Los cuatro mecanismos de comunicación entre procesos: memoria compartida, paso de
+    mensajes, archivos compartidos y portapapeles.<br>
+    2. Qué es la prioridad de un proceso y los seis niveles disponibles en Windows.<br>
+    3. Los pasos para cambiar la prioridad desde el Administrador de Tareas.</p>
+  </div>
+
+  <div class="note ok">
+    <strong>Con esto cerramos la teoría.</strong> A continuación pasan a los Talleres 1 y 2, donde van a trabajar
+    directamente con comunicación entre procesos (portapapeles) y con el cambio de prioridad de un proceso real en el
+    Administrador de Tareas.
+  </div>
+  <div class="donebox"><input type="checkbox" id="done-m7"><label for="done-m7">Módulo trabajado</label></div>
+</section>
+
+</div>
+</div>
+
+<footer><div class="wrap">
+    <span>Institución Educativa María de los Ángeles Cano · Medellín · Media Técnica: Técnico Laboral en Desarrollo de Software</span>
+    <span>Asignatura Sistemas Operativos · Gestión de procesos · Clase 6 · Material de teoría · Material de aula</span>
+  </div></footer>
+
+<script>
+function z2(n){ n = String(n); return n.length < 2 ? '0'+n : n; }
+
+(function(){
+  const el = document.getElementById('live-clock');
+  if(!el) return;
+  function tick(){
+    const d = new Date();
+    el.textContent = z2(d.getHours()) + ':' + z2(d.getMinutes()) + ':' + z2(d.getSeconds());
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+(function(){
+  const items = Array.from(document.querySelectorAll('.sidebar-item'));
+  const sections = Array.from(document.querySelectorAll('.module[id]'));
+  if(!items.length || !sections.length || !('IntersectionObserver' in window)) return;
+  function setActive(id){
+    items.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === '#'+id); });
+  }
+  const obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){ if(entry.isIntersecting){ setActive(entry.target.id); } });
+  }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
+  sections.forEach(function(s){ obs.observe(s); });
+})();
+
+(function(){
+  const head = document.getElementById('route-head');
+  const list = document.getElementById('route-list');
+  const toggle = document.getElementById('route-toggle');
+  if(!head) return;
+  head.addEventListener('click', function(){
+    const open = list.classList.toggle('open');
+    toggle.textContent = open ? 'Ocultar' : 'Ver';
+  });
+})();
+
+(function(){
+  const boxes = Array.from(document.querySelectorAll('.compromiso input[type=checkbox]'));
+  const counter = document.getElementById('compromisos-count');
+  if(!boxes.length || !counter) return;
+  const total = boxes.length;
+  function update(){
+    let n = 0;
+    boxes.forEach(function(b){ b.closest('.compromiso').classList.toggle('checked', b.checked); if(b.checked) n++; });
+    counter.textContent = 'Compromisos aceptados: ' + n + ' de ' + total;
+  }
+  boxes.forEach(function(b){ b.addEventListener('change', update); });
+  update();
+})();
+
+Array.from(document.querySelectorAll('.donebox input[type=checkbox]')).forEach(function(cb){
+  cb.addEventListener('change', function(){
+    cb.closest('.module').style.opacity = cb.checked ? '0.7' : '1';
+  });
+});
+
+Array.from(document.querySelectorAll('[data-quiz-group]')).forEach(function(group){
+  const questions = Array.from(group.querySelectorAll('.quiz-q'));
+  const scoreEl = group.querySelector('.quiz-score');
+  let correct = 0;
+  questions.forEach(function(q){
+    const correctIdx = parseInt(q.dataset.correct, 10);
+    const opts = Array.from(q.querySelectorAll('.quiz-opt'));
+    let done = false;
+    opts.forEach(function(opt, i){
+      opt.addEventListener('click', function(){
+        if(done) return;
+        done = true;
+        if(i === correctIdx){ opt.classList.add('correct'); correct++; }
+        else { opt.classList.add('wrong'); opts[correctIdx].classList.add('correct'); }
+        if(scoreEl) scoreEl.textContent = 'Aciertos: ' + correct + ' / ' + questions.length;
+      });
+    });
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clase 5 · Evaluación · Gestión de procesos · IE María de los Ángeles Cano</title>
+<meta name="description" content="Evaluación final de la Clase 5 de Sistemas Operativos: gestión de procesos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F8FD;
+  --surface:#FFFFFF;
+  --surface-alt:#EAF3FC;
+  --surface-alt-2:#DCEBFA;
+  --primary:#155DA6;
+  --primary-dark:#0B3B6B;
+  --primary-mid:#3E82C4;
+  --ink:#132437;
+  --ink-soft:#52708C;
+  --border:#D3E3F2;
+  --accent:#E12419;
+  --accent-soft:#FCE7E5;
+  --success:#177A4C;
+  --success-soft:#E4F5EC;
+  --warn:#B4552F;
+  --warn-soft:#FBEEE6;
+  --radius:14px;
+  --radius-sm:9px;
+  --font-display:'Sora',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'Courier New',monospace;
+  --maxw:920px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.55;font-size:16px;}
+h1,h2,h3,h4{font-family:var(--font-display);color:var(--primary-dark);margin:0 0 .5rem;line-height:1.25;}
+p{margin:0 0 .9rem;}
+a{color:var(--primary);}
+img{max-width:100%;display:block;}
+:focus-visible{outline:3px solid var(--primary-mid);outline-offset:2px;}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 1.25rem;}
+.masthead{background:var(--surface);border-bottom:1px solid var(--border);padding:.85rem 0;}
+.masthead .row{display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;}
+.masthead img.logo{width:38px;height:35px;object-fit:contain;flex:none;margin-right:.15rem;}
+.masthead .inst{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--primary);}
+.masthead .inst span{color:var(--ink-soft);font-weight:600;text-transform:none;letter-spacing:0;}
+.sessionbar{position:sticky;top:0;z-index:40;background:var(--primary-dark);color:#EAF3FC;font-family:var(--font-mono);box-shadow:0 2px 10px rgba(11,59,107,.25);}
+.sessionbar .inner{max-width:var(--maxw);margin:0 auto;padding:.55rem 1.25rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;font-size:.82rem;}
+.sessionbar .spacer{flex:1;}
+.sessionbar .clock-box{font-family:var(--font-mono);font-weight:700;font-size:.85rem;color:#EAF3FC;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);border-radius:7px;padding:.32rem .65rem;}
+.sessionbar .navlink{font-family:var(--font-body);font-size:.83rem;font-weight:700;color:#EAF3FC;text-decoration:none;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.3);border-radius:7px;padding:.32rem .75rem;}
+.sessionbar .navlink:hover{background:rgba(255,255,255,.18);}
+.hero{padding:2.4rem 0 1.6rem;}
+.hero .eyebrow{font-size:.78rem;font-weight:700;color:var(--primary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.4rem;}
+.hero h1{font-size:clamp(1.7rem,4vw,2.5rem);}
+.hero .lead{font-size:1.05rem;color:var(--ink-soft);max-width:62ch;}
+.module{max-width:var(--maxw);margin:0 auto;padding:1.6rem 1.25rem;border-top:1px solid var(--border);}
+.module:first-of-type{border-top:none;}
+.kicker{display:flex;align-items:center;gap:.6rem;font-family:var(--font-mono);font-size:.76rem;color:var(--ink-soft);margin-bottom:.5rem;}
+.kicker .num{background:var(--primary);color:#fff;border-radius:6px;padding:.12rem .5rem;font-weight:700;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;margin:.9rem 0;}
+button, .btn{font-family:var(--font-body);font-weight:700;font-size:.9rem;border:none;border-radius:9px;padding:.55rem 1.05rem;cursor:pointer;background:var(--primary);color:#fff;}
+button:hover,.btn:hover{background:var(--primary-dark);}
+button:disabled{opacity:.5;cursor:not-allowed;}
+.btnrow{display:flex;gap:.5rem;flex-wrap:wrap;margin:.6rem 0;}
+label{display:block;font-size:.78rem;font-weight:700;color:var(--ink-soft);margin:.5rem 0 .25rem;text-transform:uppercase;letter-spacing:.03em;}
+input[type=text],input[type=email],textarea,select{width:100%;font-family:var(--font-body);font-size:.95rem;padding:.5rem .65rem;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--ink);}
+textarea{min-height:4.5rem;resize:vertical;}
+input:focus,textarea:focus,select:focus{border-color:var(--primary-mid);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+@media (max-width:600px){.field-row{grid-template-columns:1fr;}}
+.datosbox{background:var(--surface-alt);border:1px solid var(--surface-alt-2);}
+.quiz-q{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.85rem 1rem;margin:.7rem 0;}
+.quiz-q p.stem{font-weight:700;margin-bottom:.5rem;}
+.quiz-opts{display:flex;flex-direction:column;gap:.4rem;}
+.quiz-opt{display:block;text-align:left;background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;padding:.45rem .7rem;font-size:.9rem;color:var(--ink);cursor:pointer;font-family:var(--font-body);font-weight:500;}
+.quiz-opt:hover{background:var(--surface-alt-2);}
+.quiz-opt.selected{background:var(--surface-alt-2);border-color:var(--primary);color:var(--primary-dark);font-weight:700;}
+.quiz-opt.correct{background:var(--success-soft);border-color:var(--success);color:var(--success);font-weight:700;}
+.quiz-opt.wrong{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);}
+.quiz-score{font-family:var(--font-mono);font-weight:700;color:var(--primary-dark);margin-top:.5rem;}
+.eval-form input:disabled, .eval-form textarea:disabled{background:#F0F2F4;color:var(--ink-soft);}
+.eval-receipt{display:none;}
+.note{background:var(--surface-alt);border-left:4px solid var(--primary);border-radius:0 8px 8px 0;padding:.7rem 1rem;margin:.9rem 0;font-size:.92rem;}
+.note.ok{background:var(--success-soft);border-color:var(--success);}
+footer{background:var(--primary-dark);color:#BFD6EE;padding:1.6rem 0;margin-top:2rem;font-size:.82rem;}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;}
+@media print{
+  .sessionbar,footer,.no-print,button{display:none !important;}
+  body{background:#fff;}
+}
+@media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto !important;transition:none !important;} }
+</style>
+</head>
+<body>
+
+<header class="masthead"><div class="wrap row">
+    <img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXgAAAFdCAYAAAAJ/HYjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAFiUAABYlAUlSJPAAAP+lSURBVHhe" alt="Escudo IE María de los Ángeles Cano">
+    <div class="inst">IE María de los Ángeles Cano <span>· Medellín · Media Técnica</span></div>
+  </div></header>
+<div class="sessionbar"><div class="inner">
+    <span class="clock-box" id="live-clock">--:--:--</span>
+    <span class="spacer"></span>
+    <a class="navlink" href="clase-5-teoria.html">Teoría</a><a class="navlink" href="clase-5-talleres.html">Talleres</a>
+  </div></div>
+
+<div class="wrap">
+<main class="hero">
+  <div class="eyebrow">Gestión de procesos · Clase 5 · Evaluación (aplica al inicio de la Clase 6)</div>
+  <h1>Evaluación: gestión de procesos</h1>
+  <p class="lead">Esta evaluación es sobre lo trabajado hoy en la Clase 5 (gestión de procesos), pero se resuelve al
+  inicio de la próxima sesión, como repaso de apertura antes de empezar contenido nuevo. 6 preguntas de selección
+  múltiple y 2 preguntas abiertas. Responde con calma: una vez la envíes, el formulario queda bloqueado y no podrás
+  modificarla.</p>
+</main>
+
+<div class="eval-form" data-hoja="Evaluacion">
+
+<section class="module" style="border-top:none;">
+  <div class="kicker"><span class="num">ID</span><span>Identificación</span></div>
+  <h2>Tus datos</h2>
+  <div class="card datosbox">
+    <div class="field-row">
+      <div><label>Nombres y apellidos completos</label><input type="text" data-field="Nombre"></div>
+      <div><label>Número de documento</label><input type="text" data-field="Documento"></div>
+    </div>
+    <div class="field-row">
+      <div><label>Grupo</label><input type="text" data-field="Grupo" placeholder="Ej: 10-A"></div>
+      <div><label>Correo institucional</label><input type="email" data-field="Correo"></div>
+    </div>
+  </div>
+</section>
+
+<section class="module">
+  <h2>Selección múltiple</h2>
+  <div data-quiz-group data-quiz-graded>
+    <div class="quiz-q" data-correct="1"><p class="stem">1. ¿Cuál de las siguientes definiciones describe mejor un proceso?</p>
+      <div class="quiz-opts"><button class="quiz-opt">Un archivo guardado en el disco duro</button><button class="quiz-opt">Un programa en ejecución, con recursos y estado propios</button><button class="quiz-opt">El nombre de un ícono en el escritorio</button><button class="quiz-opt">Una carpeta del sistema operativo</button></div></div>
+
+    <div class="quiz-q" data-correct="0"><p class="stem">2. El Administrador de Tareas de Windows muestra principalmente...</p>
+      <div class="quiz-opts"><button class="quiz-opt">Procesos en ejecución</button><button class="quiz-opt">Todos los programas instalados, se usen o no</button><button class="quiz-opt">Solo los archivos abiertos</button><button class="quiz-opt">Los controladores de hardware</button></div></div>
+
+    <div class="quiz-q" data-correct="2"><p class="stem">3. Un proceso que está esperando terminar de leer un archivo del disco se encuentra en estado de...</p>
+      <div class="quiz-opts"><button class="quiz-opt">Nuevo</button><button class="quiz-opt">Ejecución</button><button class="quiz-opt">Espera</button><button class="quiz-opt">Terminado</button></div></div>
+
+    <div class="quiz-q" data-correct="3"><p class="stem">4. ¿Cuál es el orden correcto del ciclo de vida más simple de un proceso?</p>
+      <div class="quiz-opts"><button class="quiz-opt">Listo → Nuevo → Ejecución → Terminado</button><button class="quiz-opt">Ejecución → Nuevo → Listo → Terminado</button><button class="quiz-opt">Terminado → Listo → Nuevo → Ejecución</button><button class="quiz-opt">Nuevo → Listo → Ejecución → Terminado</button></div></div>
+
+    <div class="quiz-q" data-correct="1"><p class="stem">5. Cuando en el Administrador de Tareas seleccionas "Finalizar tarea", el sistema operativo ejecuta la operación...</p>
+      <div class="quiz-opts"><button class="quiz-opt">Crear</button><button class="quiz-opt">Terminar</button><button class="quiz-opt">Suspender</button><button class="quiz-opt">Reanudar</button></div></div>
+
+    <div class="quiz-q" data-correct="0"><p class="stem">6. Una aplicación de celular que pasa a segundo plano sin cerrarse, para ahorrar batería, está aplicando la operación de...</p>
+      <div class="quiz-opts"><button class="quiz-opt">Suspender</button><button class="quiz-opt">Crear</button><button class="quiz-opt">Terminar</button><button class="quiz-opt">Ninguna, el proceso desaparece</button></div></div>
+
+    <div class="quiz-score">Selecciona una opción en cada pregunta. Verás tus aciertos al enviar la evaluación.</div>
+  </div>
+</section>
+
+<section class="module">
+  <h2>Preguntas abiertas</h2>
+  <label>1. Retoma tu investigación de la teoría (módulo "Investiga: procesos zombis y huérfanos"). Explica, con tus propias palabras, qué es un proceso zombi y qué es un proceso huérfano, y cuál es la diferencia entre ambos.</label>
+  <textarea data-field="Abierta1"></textarea>
+  <label>2. Piensa en el Taller 2 de hoy, cuando cerraste un proceso con "Finalizar tarea" en lugar de cerrarlo de forma normal. ¿Qué riesgo tiene usar siempre "Finalizar tarea" como método de cierre? Argumenta tu respuesta con lo trabajado en la teoría y en el taller.</label>
+  <textarea data-field="Abierta2"></textarea>
+</section>
+
+<section class="module">
+  <div class="btnrow">
+    <button class="js-enviar-evaluacion-c3">Enviar evaluación</button>
+  </div>
+  <p style="font-size:.8rem;color:var(--ink-soft);">Al hacer clic se te pedirá confirmar. Una vez confirmes, la
+  evaluación queda enviada y bloqueada: no podrás editarla después.</p>
+  <div class="eval-receipt"></div>
+</section>
+
+</div>
+</div>
+
+<footer><div class="wrap">
+    <span>Institución Educativa María de los Ángeles Cano · Medellín · Media Técnica: Técnico Laboral en Desarrollo de Software</span>
+    <span>Asignatura Sistemas Operativos · Gestión de procesos · Clase 5 · Evaluación final · Material de aula</span>
+  </div></footer>
+
+<script>
+function z2(n){ n = String(n); return n.length < 2 ? '0'+n : n; }
+
+const SHEETS_ACTION_URL = "https://script.google.com/macros/s/AKfycbympJHPQW6J4d_-C9wM8PyLKPWkDaEfGzwNv0zSsPvFOwQQCsPzllVxEc20AJRuiuXc/exec";
+
+function submitToAppsScript(hoja, data){
+  if(!SHEETS_ACTION_URL) return false;
+  const iframeId = 'gsheet-target';
+  let iframe = document.getElementById(iframeId);
+  if(!iframe){
+    iframe = document.createElement('iframe');
+    iframe.name = iframeId; iframe.id = iframeId; iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+  }
+  const form = document.createElement('form');
+  form.action = SHEETS_ACTION_URL; form.method = 'POST'; form.target = iframeId;
+  const allData = Object.assign({ hoja: hoja }, data);
+  Object.keys(allData).forEach(function(key){
+    const input = document.createElement('input');
+    input.type = 'hidden'; input.name = key; input.value = allData[key];
+    form.appendChild(input);
+  });
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(function(){ form.remove(); }, 1000);
+  return true;
+}
+
+Array.from(document.querySelectorAll('.js-enviar-evaluacion-c3')).forEach(function(btn){
+  btn.addEventListener('click', function(){
+    if(btn.dataset.sent === '1') return;
+    const box = btn.closest('.eval-form');
+    const nombre = box.querySelector('[data-field="Nombre"]').value.trim();
+    const documento = box.querySelector('[data-field="Documento"]').value.trim();
+    if(!nombre || !documento){ alert('Completa al menos tu nombre y tu número de documento antes de enviar.'); return; }
+
+    const questions = Array.from(box.querySelectorAll('[data-quiz-graded] .quiz-q'));
+    const unanswered = questions.filter(function(q){ return q.dataset.selected === undefined; });
+    if(unanswered.length){ alert('Todavía tienes ' + unanswered.length + ' pregunta(s) de selección múltiple sin responder.'); return; }
+
+    const ok = window.confirm('¿Estás seguro de enviar la evaluación? Una vez enviada, no podrás modificarla.');
+    if(!ok) return;
+
+    let correct = 0;
+    questions.forEach(function(q){
+      const correctIdx = parseInt(q.dataset.correct, 10);
+      const selectedIdx = parseInt(q.dataset.selected, 10);
+      const opts = Array.from(q.querySelectorAll('.quiz-opt'));
+      if(selectedIdx === correctIdx){ opts[correctIdx].classList.add('correct'); correct++; }
+      else{ opts[selectedIdx].classList.add('wrong'); opts[correctIdx].classList.add('correct'); }
+    });
+    const scoreText = correct + ' / ' + questions.length;
+    const scoreEl = box.querySelector('.quiz-score');
+    if(scoreEl) scoreEl.textContent = 'Aciertos: ' + scoreText;
+
+    const data = {
+      Nombre: nombre, Documento: documento,
+      Grupo: box.querySelector('[data-field="Grupo"]').value.trim(),
+      Correo: box.querySelector('[data-field="Correo"]').value.trim(),
+      Aciertos: scoreText,
+      Abierta1: box.querySelector('[data-field="Abierta1"]').value.trim(),
+      Abierta2: box.querySelector('[data-field="Abierta2"]').value.trim(),
+    };
+    submitToAppsScript('Evaluacion', data);
+
+    Array.from(box.querySelectorAll('input, textarea, button')).forEach(function(el){ el.disabled = true; });
+    const receipt = box.querySelector('.eval-receipt');
+    if(receipt){
+      receipt.style.display = 'block';
+      receipt.innerHTML = '<div class="note ok"><b>Evaluación enviada y bloqueada.</b><br>' +
+        'Estudiante: ' + nombre + ' · Documento: ' + documento + '<br>' +
+        'Aciertos: ' + scoreText + '<br>' +
+        'Fecha y hora: ' + new Date().toLocaleString('es-CO') + '</div>';
+    }
+    btn.textContent = 'Evaluación enviada';
+  });
+});
+
+(function(){
+  const el = document.getElementById('live-clock');
+  if(!el) return;
+  function tick(){
+    const d = new Date();
+    el.textContent = z2(d.getHours()) + ':' + z2(d.getMinutes()) + ':' + z2(d.getSeconds());
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+Array.from(document.querySelectorAll('[data-quiz-group][data-quiz-graded]')).forEach(function(group){
+  const questions = Array.from(group.querySelectorAll('.quiz-q'));
+  questions.forEach(function(q){
+    const opts = Array.from(q.querySelectorAll('.quiz-opt'));
+    opts.forEach(function(opt, i){
+      opt.addEventListener('click', function(){
+        opts.forEach(function(o){ o.classList.remove('selected'); });
+        opt.classList.add('selected');
+        q.dataset.selected = i;
+      });
+    });
+  });
+});
+</script>
+</body>
+</html>
